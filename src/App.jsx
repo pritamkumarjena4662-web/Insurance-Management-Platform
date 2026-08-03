@@ -8,6 +8,7 @@ import Policies from "./pages/Policies";
 import Claims from "./pages/Claims";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Documents from "./pages/Documents";
 
 import "./App.css";
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/claims" element={<Claims />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/documents" element={<Documents />} />
         </Routes>
 
       </div>

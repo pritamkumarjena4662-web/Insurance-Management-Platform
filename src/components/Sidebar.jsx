@@ -13,6 +13,7 @@ function Sidebar() {
         <li><Link to="/claims">💰 Claims</Link></li>
         <li><Link to="/reports">📊 Reports</Link></li>
         <li><Link to="/settings">⚙️ Settings</Link></li>
+        <li><Link to="/documents">📁 Documents</Link></li>
       </ul>
     </div>
   );
