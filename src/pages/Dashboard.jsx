@@ -83,11 +83,12 @@ function Dashboard() {
 
           <div
             style={{
-              width: "90%",
-              maxWidth: "800px",
+              width: "100%",
+              maxWidth: "900px",
               margin: "20px auto",
               background: "white",
               padding: "20px",
+              height: "420px",
               borderRadius: "10px",
             }}
           >

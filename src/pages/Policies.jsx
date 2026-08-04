@@ -1,172 +1,86 @@
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 
-function Policies() {
-  const [showForm, setShowForm] = useState(false);
-  const [customer, setCustomer] = useState("");
-  const [type, setType] = useState("");
-  const [premium, setPremium] = useState("");
+const initialPolicies = [
+  { id: 1, holder: "John Doe", type: "Health", premium: 1200, status: "Active" },
+  { id: 2, holder: "Alice Smith", type: "Life", premium: 2400, status: "Pending" },
+];
 
-  const [policies, setPolicies] = useState([
-    {
-      id: 101,
-      customer: "Rahul Sharma",
-      type: "Health Insurance",
-      premium: "₹12,000",
-    },
-    {
-      id: 102,
-      customer: "Priya Das",
-      type: "Life Insurance",
-      premium: "₹18,500",
-    },
-  ]);
+export default function Policies() {
+  const [policies, setPolicies] = useState(initialPolicies);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
+  const [form, setForm] = useState({ holder:"", type:"Health", premium:"", status:"Active" });
+  const [editId, setEditId] = useState(null);
+  const [page, setPage] = useState(1);
+  const perPage = 5;
 
-  const addPolicy = () => {
-    if (!customer || !type || !premium) {
-      alert("Please fill all fields");
-      return;
+  const filtered = useMemo(() => policies.filter(p =>
+    (filter==="All" || p.status===filter) &&
+    (p.holder.toLowerCase().includes(search.toLowerCase()) ||
+     p.type.toLowerCase().includes(search.toLowerCase()))
+  ), [policies, search, filter]);
+
+  const pages = Math.max(1, Math.ceil(filtered.length/perPage));
+  const current = filtered.slice((page-1)*perPage, page*perPage);
+
+  const save = () => {
+    if (!form.holder || !form.premium) return;
+    if (editId) {
+      setPolicies(policies.map(p=>p.id===editId?{...p,...form,premium:Number(form.premium)}:p));
+      setEditId(null);
+    } else {
+      setPolicies([...policies,{id:Date.now(),...form,premium:Number(form.premium)}]);
     }
-
-    const newPolicy = {
-      id: policies.length + 101,
-      customer,
-      type,
-      premium,
-    };
-
-    setPolicies([...policies, newPolicy]);
-    setCustomer("");
-    setType("");
-    setPremium("");
-    setShowForm(false);
+    setForm({ holder:"", type:"Health", premium:"", status:"Active" });
   };
 
-  const deletePolicy = (id) => {
-    setPolicies(policies.filter((policy) => policy.id !== id));
-  };
+  const edit = p => { setEditId(p.id); setForm({...p}); };
+  const del = id => setPolicies(policies.filter(p=>p.id!==id));
 
   return (
-    <div style={{ padding: "30px", width: "100%" }}>
-      <h2 style={{ textAlign: "center", color: "white" }}>
-        Policies
-      </h2>
+    <div style={{background:"#111827",color:"#fff",minHeight:"100vh",padding:24,fontFamily:"Arial"}}>
+      <h2>Insurance Policies</h2>
+      <p>Total Policies: <b>{policies.length}</b></p>
 
-      <div style={{ textAlign: "center", margin: "20px" }}>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          style={{
-            padding: "10px 20px",
-            background: "green",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Add Policy
-        </button>
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:16}}>
+        <input placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+        <select value={filter} onChange={e=>{setFilter(e.target.value);setPage(1);}}>
+          <option>All</option><option>Active</option><option>Pending</option><option>Expired</option>
+        </select>
       </div>
 
-      {showForm && (
-        <div
-          style={{
-            width: "350px",
-            margin: "20px auto",
-            background: "white",
-            padding: "20px",
-            borderRadius: "10px",
-          }}
-        >
-          <input
-            type="text"
-            placeholder="Customer Name"
-            value={customer}
-            onChange={(e) => setCustomer(e.target.value)}
-            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-          />
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
+        <input placeholder="Holder" value={form.holder} onChange={e=>setForm({...form,holder:e.target.value})}/>
+        <select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
+          <option>Health</option><option>Life</option><option>Vehicle</option><option>Home</option>
+        </select>
+        <input type="number" placeholder="Premium" value={form.premium} onChange={e=>setForm({...form,premium:e.target.value})}/>
+        <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})}>
+          <option>Active</option><option>Pending</option><option>Expired</option>
+        </select>
+        <button onClick={save}>{editId?"Update":"Add"} Policy</button>
+      </div>
 
-          <input
-            type="text"
-            placeholder="Policy Type"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-          />
-
-          <input
-            type="text"
-            placeholder="Premium"
-            value={premium}
-            onChange={(e) => setPremium(e.target.value)}
-            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-          />
-
-          <button
-            onClick={addPolicy}
-            style={{
-              width: "100%",
-              padding: "10px",
-              background: "green",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-            }}
-          >
-            Save Policy
-          </button>
-        </div>
-      )}
-
-      <table
-        border="1"
-        cellPadding="15"
-        style={{
-          width: "95%",
-          margin: "0 auto",
-          background: "white",
-          color: "black",
-          borderCollapse: "collapse",
-          textAlign: "center",
-        }}
-      >
-        <thead>
-          <tr>
-            <th>Policy ID</th>
-            <th>Customer</th>
-            <th>Policy Type</th>
-            <th>Premium</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
+      <table width="100%" cellPadding="8" style={{borderCollapse:"collapse"}}>
+        <thead><tr><th>ID</th><th>Holder</th><th>Type</th><th>Premium</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
-          {policies.map((policy) => (
-            <tr key={policy.id}>
-              <td>{policy.id}</td>
-              <td>{policy.customer}</td>
-              <td>{policy.type}</td>
-              <td>{policy.premium}</td>
-              <td>
-                <button
-                  onClick={() => deletePolicy(policy.id)}
-                  style={{
-                    background: "red",
-                    color: "white",
-                    border: "none",
-                    padding: "6px 12px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+        {current.map(p=>(
+          <tr key={p.id}>
+            <td>{p.id}</td><td>{p.holder}</td><td>{p.type}</td><td>${p.premium}</td><td>{p.status}</td>
+            <td>
+              <button onClick={()=>edit(p)}>Edit</button>{" "}
+              <button onClick={()=>del(p.id)}>Delete</button>
+            </td>
+          </tr>
+        ))}
         </tbody>
       </table>
+
+      <div style={{marginTop:16}}>
+        <button disabled={page===1} onClick={()=>setPage(page-1)}>Prev</button>
+        <span style={{margin:"0 10px"}}>{page}/{pages}</span>
+        <button disabled={page===pages} onClick={()=>setPage(page+1)}>Next</button>
+      </div>
     </div>
   );
 }
-
-export default Policies;
